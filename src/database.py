@@ -1,4 +1,5 @@
 import mysql.connector
+from mysql.connector import Error
 import logging
 
 class Database:
@@ -20,14 +21,44 @@ class Database:
             password (str): Contraseña de MySQL.
             database (str): Nombre de la base de datos.
         """
-        self.connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
-        self.cursor = self.connection.cursor()
+        try:
+            self.connection = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database
+            )
+            if self.connection.is_connected():
+                self.cursor = self.connection.cursor()
+                print("Conectado a la base de datos MySQL")
+        except Error as e:
+            print(f"Error al conectarse a MySQL: {e}")
 
+    def clean_database(self):
+        try:
+            # Desactivar la verificación de claves foráneas
+            self.cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+            
+            # Lista de tablas a limpiar
+            tables = ["quote_tags", "tags", "quotes", "authors"]
+            
+            for table in tables:
+                self.cursor.execute(f"TRUNCATE TABLE {table}")
+                print(f"Tabla {table} truncada con éxito")
+            
+            # Reactivar la verificación de claves foráneas
+            self.cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+            
+            self.connection.commit()
+            print("Se han limpiado todas las tablas")
+            
+        except Error as e:
+            print(f"Error limpiando base de datos: {e}")
+            # En caso de error, asegúrate de reactivar la verificación de claves foráneas
+            self.cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+            self.connection.rollback()
+
+        
     def create_tables(self):
         """
         Crea las tablas necesarias en la base de datos si no existen.
@@ -41,8 +72,10 @@ class Database:
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) UNIQUE,
                     bio TEXT
-                )
+                ) 
             """)
+            logging.info("Tabla authors creada o ya existe.")
+                        
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS quotes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,26 +83,32 @@ class Database:
                     author_id INT,
                     UNIQUE KEY unique_text (text(255)),
                     FOREIGN KEY (author_id) REFERENCES authors(id)
-                )
+                ) 
             """)
+            logging.info("Tabla quotes creada o ya existe.")     
+            
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tags (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) UNIQUE
-                )
+                ) 
             """)
+            logging.info("Tabla tags creada o ya existe.")       
+ 
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS quote_tags (
                     quote_id INT,
                     tag_id INT,
                     FOREIGN KEY (quote_id) REFERENCES quotes(id),
                     FOREIGN KEY (tag_id) REFERENCES tags(id)
-                )
+                ) 
             """)
+            logging.info("Tabla quote_tags creada o ya existe.")   
+
             self.connection.commit()
             logging.info("Tablas creadas con éxito")
-        except mysql.connector.Error as err:
-            logging.error(f"Error creando tablas: {str(err)}")
+        except Error as e:
+            logging.error(f"Error creando tablas: {str(e)}")
             raise
         
     def get_author_id(self, author_name):
@@ -77,8 +116,8 @@ class Database:
             self.cursor.execute("SELECT id FROM authors WHERE name = %s", (author_name,))
             result = self.cursor.fetchone()
             return result[0] if result else None
-        except mysql.connector.Error as err:
-            logging.error(f"Error obteniendo el ID del autor: {err}")
+        except Error as e:
+            logging.error(f"Error obteniendo el ID del autor: {e}")
             return None
 
     def get_tag_id(self, tag_name):
@@ -86,8 +125,8 @@ class Database:
             self.cursor.execute("SELECT id FROM tags WHERE name = %s", (tag_name,))
             result = self.cursor.fetchone()
             return result[0] if result else None
-        except mysql.connector.Error as err:
-            logging.error(f"Error obteniendo el ID del tag: {err}")
+        except Error as e:
+            logging.error(f"Error obteniendo el ID del tag: {e}")
             return None
 
     def insert_data(self, quotes, authors):
@@ -108,8 +147,8 @@ class Database:
                     self.cursor.execute("INSERT IGNORE INTO authors (name, bio) VALUES (%s, %s)", (author.name, author.bio))
                     self.cursor.execute("SELECT id FROM authors WHERE name = %s", (author.name,))
                     author_id = self.cursor.fetchone()[0]
-                except mysql.connector.Error as err:
-                    logging.error(f"Error insertando autor {author_name}: {err}")
+                except Error as e:
+                    logging.error(f"Error insertando autor {author_name}: {e}")
                     continue
                 
             for quote in quotes:
@@ -133,14 +172,14 @@ class Database:
                                     self.cursor.execute("SELECT id FROM tags WHERE name = %s", (tag,))
                                     tag_id = self.cursor.fetchone()[0]
                                     self.cursor.execute("INSERT INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)", (quote_id, tag_id))
-                        except mysql.connector.Error as err:
-                            logging.error(f"Error insertando cita: {err}")
+                        except Error as e:
+                            logging.error(f"Error insertando cita: {e}")
                             continue
                         
             self.connection.commit()
             logging.info("Datos insertados con éxito")
-        except mysql.connector.Error as err:
-            logging.error(f"Error insertando datos: {err}")
+        except Error as e:
+            logging.error(f"Error insertando datos: {e}")
             raise
 
     def close(self):

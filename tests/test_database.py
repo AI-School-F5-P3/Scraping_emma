@@ -12,23 +12,29 @@ def database():
         password="admin",
         database="quotes_db"
     )
-    db.create_tables()
+    db.clean_database()  # Llama a la función clean_database antes de cada prueba
     yield db
+    db.clean_database()  # Asegura que la base de datos esté limpia después de cada prueba
     db.connection.close()
     
-@pytest.fixture(autouse=True)
-def clean_database(database):
-    database.cursor.execute("DELETE FROM quote_tags")
-    database.cursor.execute("DELETE FROM quotes")
-    database.cursor.execute("DELETE FROM authors")
-    database.cursor.execute("DELETE FROM tags")
-    database.connection.commit()
+
 
 def test_create_tables(database):
     # Verifica que las tablas existan
+    
+#   database.create_tables()
+#   database.cursor.execute("SHOW TABLES")
+#   tables = database.cursor.fetchall()
+#   assert len(tables) == 4  # authors, quotes, tags, quote_tags
+    database.create_tables()
     database.cursor.execute("SHOW TABLES")
     tables = database.cursor.fetchall()
-    assert len(tables) == 4  # authors, quotes, tags, quote_tags
+    print("Tablas encontradas en la base de datos:", tables)  # Agregar registro para depuración
+    tables = [table[0] for table in tables]
+    assert "authors" in tables
+    assert "quotes" in tables
+    assert "tags" in tables
+    assert "quote_tags" in tables
 
 def test_insert_data(database):
     authors = {
