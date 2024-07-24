@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 import logging
+from .models import Quote, Author
 
 class Database:
     """
@@ -22,6 +23,7 @@ class Database:
             database (str): Nombre de la base de datos.
         """
         try:
+            
             self.connection = mysql.connector.connect(
                 host=host,
                 user=user,
@@ -94,7 +96,7 @@ class Database:
                 ) 
             """)
             logging.info("Tabla tags creada o ya existe.")       
- 
+
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS quote_tags (
                     quote_id INT,
@@ -181,7 +183,44 @@ class Database:
         except Error as e:
             logging.error(f"Error insertando datos: {e}")
             raise
+        
+    # Aquí se implementan las funciones para recuperar datos
+    def list_quotes(self, limit=1000, offset=0):
+        try:
+            self.cursor.execute("""
+                SELECT q.id, q.text, a.name as author, GROUP_CONCAT(t.name) as tags
+                FROM quotes q
+                JOIN authors a ON q.author_id = a.id
+                LEFT JOIN quote_tags qt ON q.id = qt.quote_id
+                LEFT JOIN tags t ON qt.tag_id = t.id
+                GROUP BY q.id
+                LIMIT %s OFFSET %s
+            """, (limit, offset))
+            results = self.cursor.fetchall()
+            return [Quote(text=row[1], author=row[2], tags=row[3].split(',') if row[3] else []) for row in results]
+        except Error as e:
+            logging.error(f"Error listing quotes: {e}")
+            return []
 
+    def read_quote(self, quote_id):
+        try:
+            self.cursor.execute("""
+                SELECT q.id, q.text, a.name as author, GROUP_CONCAT(t.name) as tags
+                FROM quotes q
+                JOIN authors a ON q.author_id = a.id
+                LEFT JOIN quote_tags qt ON q.id = qt.quote_id
+                LEFT JOIN tags t ON qt.tag_id = t.id
+                WHERE q.id = %s
+                GROUP BY q.id
+            """, (quote_id,))
+            result = self.cursor.fetchone()
+            if result:
+                return Quote(text=result[1], author=result[2], tags=result[3].split(',') if result[3] else [])
+            return None
+        except Error as e:
+            logging.error(f"Error reading quote: {e}")
+            return None
+                
     def close(self):
         """Cierra la conexión a la base de datos."""
         self.cursor.close()

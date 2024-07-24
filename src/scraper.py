@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from .models import Quote, Author
-
+from config.config import SCRAPE_URL
 class Scraper:
     """
     Clase para realizar web scraping en quotes.toscrape.com.
@@ -13,8 +13,8 @@ class Scraper:
         authors (dict): Diccionario de objetos Author extraídos.
     """
 
-    def __init__(self, url):
-        self.url = url
+    def __init__(self):
+        self.url = SCRAPE_URL
         self.quotes = []
         self.authors = {}
 
@@ -26,10 +26,15 @@ class Scraper:
             Exception: Si ocurre un error durante el scraping.
         """
         try:
+            # Hacer una solicitud HTTP a la página web
             response = requests.get(self.url)
+            response.raise_for_status()
+            
+            # Parsear el HTML con BeautifulSoup
             soup = BeautifulSoup(response.text, 'html.parser')
             quote_divs = soup.find_all('div', class_='quote')
 
+            # Extraer las frases y la información asociada
             for quote_div in quote_divs:
                 text = quote_div.find('span', class_='text').text.strip()
                 author = quote_div.find('small', class_='author').text.strip()
@@ -45,8 +50,9 @@ class Scraper:
         try:
             for quote in self.quotes:
                 if quote.author not in self.authors:
-                    author_url = self.url + quote.author.replace(' ', '-')
+                    author_url = self.url + 'author/' + quote.author.replace(' ', '-')
                     response = requests.get(author_url)
+                    response.raise_for_status()
                     soup = BeautifulSoup(response.text, 'html.parser')
                     author_description = soup.find('div', class_='author-description')
                     if author_description:

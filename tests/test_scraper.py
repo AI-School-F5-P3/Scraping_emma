@@ -1,9 +1,10 @@
 import pytest
 from src.scraper import Scraper
+from config.config import SCRAPE_URL  # Asegúrate de importar la URL de scraping
 
 @pytest.fixture
 def scraper():
-    return Scraper('https://quotes.toscrape.com/')
+    return Scraper() # Asume que Scraper no necesita argumentos en el constructor
 
 def test_scrape_quotes(scraper):
     scraper.scrape_quotes()

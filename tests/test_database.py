@@ -6,18 +6,11 @@ import logging
 
 @pytest.fixture
 def database():
-    db = Database(
-        host="localhost",
-        user="root",
-        password="admin",
-        database="quotes_db"
-    )
+    db = Database()
     db.clean_database()  # Llama a la función clean_database antes de cada prueba
     yield db
     db.clean_database()  # Asegura que la base de datos esté limpia después de cada prueba
-    db.connection.close()
-    
-
+    db.close()
 
 def test_create_tables(database):
     # Verifica que las tablas existan
