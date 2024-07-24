@@ -57,7 +57,7 @@ def test_insert_data(database):
 
 def test_get_author_id(database):
     # Primero, insertamos un autor
-    database.cursor.execute("INSERT INTO authors (name, bio) VALUES (%s, %s)", ("Albert Einstein", "Físico teórico alemán."))
+    database.cursor.execute("INSERT INTO authors (name, about) VALUES (%s, %s)", ("Albert Einstein", "Físico teórico alemán."))
     database.connection.commit()
 
     author_name = "Albert Einstein"

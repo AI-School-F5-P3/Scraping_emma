@@ -20,6 +20,9 @@ class Database:
             user (str): Nombre de usuario de MySQL.
             password (str): Contraseña de MySQL.
             database (str): Nombre de la base de datos.
+
+        Raises:
+            mysql.connector.Error: Si hay un problema al conectar con la base de datos.
         """
         try:
             self.connection = mysql.connector.connect(
@@ -150,6 +153,7 @@ class Database:
                     VALUES (%s, %s) 
                     ON DUPLICATE KEY UPDATE about = VALUES(about)
                     """, (author.name, author.about))
+                    logging.debug(f"Autor insertado/actualizado: {author.name}")                    
                     self.connection.commit()
                     
                     self.cursor.execute("SELECT id FROM authors WHERE name = %s", (author.name,))
@@ -170,7 +174,7 @@ class Database:
                     if result:
                         author_id = result[0]
                     else:
-                        logging.warning(f"No se encontró el autor {quote.author} para la cita. Saltando...")
+                        logging.warning(f"No se encontró el autor {quote.author} para la cita.")
                         continue
 
                     self.cursor.execute("SELECT id FROM quotes WHERE text = %s", (quote.text,))
@@ -184,7 +188,8 @@ class Database:
                             self.cursor.execute("SELECT id FROM tags WHERE name = %s", (tag,))
                             tag_id = self.cursor.fetchone()[0]
                             self.cursor.execute("INSERT INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)", (quote_id, tag_id))
-
+                            logging.debug(f"Cita insertada: {quote.text[:30]}...")
+                            
                 except Error as e:
                     logging.error(f"Error insertando cita: {e}")
                     continue
@@ -202,4 +207,4 @@ class Database:
             self.cursor.close()
         if hasattr(self, 'connection') and self.connection is not None:
             self.connection.close()
-        print("Conexión a la base de datos cerrada")
+        logging.info("Conexión a la base de datos cerrada")

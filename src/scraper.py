@@ -17,7 +17,8 @@ class Scraper:
         self.url = url
         self.quotes = []
         self.authors = {}
-
+        logging.info(f"Scraper inicializado con URL: {url}")
+        
     def scrape_quotes(self):
         """
         Extrae todas las citas de la página principal.
@@ -26,6 +27,7 @@ class Scraper:
             Exception: Si ocurre un error durante el scraping.
         """
         try:
+            logging.info(f"Iniciando scrape de citas desde {self.url}")
             response = requests.get(self.url)
             soup = BeautifulSoup(response.text, 'html.parser')
             quote_divs = soup.find_all('div', class_='quote')
@@ -35,17 +37,30 @@ class Scraper:
                 author = quote_div.find('small', class_='author').text.strip()
                 tags = [tag.text for tag in quote_div.find_all('a', class_='tag')]
                 self.quotes.append(Quote(text, author, tags))
+                logging.debug(f"Cita extraída: {text[:30]}...")
 
             logging.info(f"Se han extraído {len(self.quotes)} citas con éxito")
+        except requests.RequestException as e:
+            logging.error(f"Error al acceder a la página {self.url}: {str(e)}")
+            raise        
         except Exception as e:
-            logging.error(f"Error extrayendo citas: {str(e)}")
+            logging.error(f"Error inesperado al extraer citas: {str(e)}")
             raise
 
     def scrape_authors(self):
+        """
+        Extrae la información de los autores de las citas.
+
+        Raises:
+            RequestException: Si hay un problema al acceder a la página de un autor.
+            Exception: Para cualquier otro error inesperado.
+        """  
         try:
+            logging.info("Iniciando scrape de autores")           
             for quote in self.quotes:
                 if quote.author not in self.authors:
                     author_url = self.url + 'author/' + quote.author.replace(' ', '-')
+                    logging.debug(f"Scrapeando autor: {quote.author} desde {author_url}")
                     response = requests.get(author_url)
                     soup = BeautifulSoup(response.text, 'html.parser')
                     
@@ -65,8 +80,12 @@ class Scraper:
                     about = f"Born: {born_date} in {born_location}\n\n{description}"
 
                     self.authors[quote.author] = Author(name, about)
-
+                    logging.debug(f"Autor extraído: {name}")
+                    
             logging.info(f"Se han extraído {len(self.authors)} autores con éxito")
+        except requests.RequestException as e:
+            logging.error(f"Error al acceder a la página de un autor: {str(e)}")
+            raise       
         except Exception as e:
             logging.error(f"Error extrayendo autores: {str(e)}")
             raise

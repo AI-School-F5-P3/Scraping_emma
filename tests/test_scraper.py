@@ -26,4 +26,4 @@ def test_author_structure(scraper):
     scraper.scrape_authors()
     author = next(iter(scraper.authors.values()))
     assert hasattr(author, 'name'), "Atributo 'name'  no encontrado para autor"
-    assert hasattr(author, 'bio'), "Atributo 'bio' no encontrado para autor"
+    assert hasattr(author, 'about'), "Atributo 'about' no encontrado para autor"
