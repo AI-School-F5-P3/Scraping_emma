@@ -20,9 +20,9 @@ class Author:
 
     Attributes:
         name (str): El nombre del autor.
-        bio (str): La biografía del autor.
+        about (str): La biografía del autor.
     """
 
-    def __init__(self, name, bio):
+    def __init__(self, name, about):
         self.name = name
-        self.bio = bio
+        self.about = about

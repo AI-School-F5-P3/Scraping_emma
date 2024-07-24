@@ -71,7 +71,7 @@ class Database:
                 CREATE TABLE IF NOT EXISTS authors (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) UNIQUE,
-                    bio TEXT
+                    about TEXT
                 ) 
             """)
             logging.info("Tabla authors creada o ya existe.")
@@ -94,7 +94,7 @@ class Database:
                 ) 
             """)
             logging.info("Tabla tags creada o ya existe.")       
- 
+
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS quote_tags (
                     quote_id INT,
@@ -140,49 +140,66 @@ class Database:
         Raises:
             Exception: Si ocurre un error al insertar los datos.
         """
+
         try:
             for author_name, author in authors.items():
                 # Inserta autor si no existe
                 try:
-                    self.cursor.execute("INSERT IGNORE INTO authors (name, bio) VALUES (%s, %s)", (author.name, author.bio))
+                    self.cursor.execute("""
+                    INSERT INTO authors (name, about) 
+                    VALUES (%s, %s) 
+                    ON DUPLICATE KEY UPDATE about = VALUES(about)
+                    """, (author.name, author.about))
+                    self.connection.commit()
+                    
                     self.cursor.execute("SELECT id FROM authors WHERE name = %s", (author.name,))
-                    author_id = self.cursor.fetchone()[0]
+                    result = self.cursor.fetchone()
+                    if result:
+                        author_id = result[0]
+                    else:
+                        logging.warning(f"No se pudo obtener el ID para el autor {author.name}")
+                        continue
                 except Error as e:
                     logging.error(f"Error insertando autor {author_name}: {e}")
                     continue
-                
+
             for quote in quotes:
-                # Verificar si la cita ya existe
-                    for tag in quote.tags:
-                        # Inserta tag si no existe y obtiene su ID
-                        try:
-                            self.cursor.execute("SELECT id FROM authors WHERE name = %s", (quote.author,))
-                            author_id = self.cursor.fetchone()[0]
-                            
-                            self.cursor.execute("SELECT id FROM quotes WHERE text = %s", (quote.text,))
-                            existing_quote = self.cursor.fetchone()
+                try:
+                    self.cursor.execute("SELECT id FROM authors WHERE name = %s", (quote.author,))
+                    result = self.cursor.fetchone()
+                    if result:
+                        author_id = result[0]
+                    else:
+                        logging.warning(f"No se encontró el autor {quote.author} para la cita. Saltando...")
+                        continue
 
-                            if not existing_quote:
-                                self.cursor.execute("INSERT INTO quotes (text, author_id) VALUES (%s, %s)", (quote.text, author_id))
-                                quote_id = self.cursor.lastrowid
+                    self.cursor.execute("SELECT id FROM quotes WHERE text = %s", (quote.text,))
+                    existing_quote = self.cursor.fetchone()
+                    if not existing_quote:
+                        self.cursor.execute("INSERT INTO quotes (text, author_id) VALUES (%s, %s)", (quote.text, author_id))
+                        quote_id = self.cursor.lastrowid
 
-                                for tag in quote.tags:
-                                    # Inserta tag si no existe y obtiene su ID
-                                    self.cursor.execute("INSERT IGNORE INTO tags (name) VALUES (%s)", (tag,))
-                                    self.cursor.execute("SELECT id FROM tags WHERE name = %s", (tag,))
-                                    tag_id = self.cursor.fetchone()[0]
-                                    self.cursor.execute("INSERT INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)", (quote_id, tag_id))
-                        except Error as e:
-                            logging.error(f"Error insertando cita: {e}")
-                            continue
-                        
+                        for tag in quote.tags:
+                            self.cursor.execute("INSERT IGNORE INTO tags (name) VALUES (%s)", (tag,))
+                            self.cursor.execute("SELECT id FROM tags WHERE name = %s", (tag,))
+                            tag_id = self.cursor.fetchone()[0]
+                            self.cursor.execute("INSERT INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)", (quote_id, tag_id))
+
+                except Error as e:
+                    logging.error(f"Error insertando cita: {e}")
+                    continue
+
             self.connection.commit()
             logging.info("Datos insertados con éxito")
         except Error as e:
             logging.error(f"Error insertando datos: {e}")
             raise
 
+
     def close(self):
         """Cierra la conexión a la base de datos."""
-        self.cursor.close()
-        self.connection.close()
+        if hasattr(self, 'cursor') and self.cursor is not None:
+            self.cursor.close()
+        if hasattr(self, 'connection') and self.connection is not None:
+            self.connection.close()
+        print("Conexión a la base de datos cerrada")

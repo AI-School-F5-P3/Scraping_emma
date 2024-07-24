@@ -45,15 +45,26 @@ class Scraper:
         try:
             for quote in self.quotes:
                 if quote.author not in self.authors:
-                    author_url = self.url + quote.author.replace(' ', '-')
+                    author_url = self.url + 'author/' + quote.author.replace(' ', '-')
                     response = requests.get(author_url)
                     soup = BeautifulSoup(response.text, 'html.parser')
-                    author_description = soup.find('div', class_='author-description')
-                    if author_description:
-                        about = author_description.text.strip()
-                    else:
-                        about = "Biografía no disponible"
-                    self.authors[quote.author] = Author(quote.author, about)
+                    
+                    name = quote.author  # Usamos el nombre que ya tenemos
+                    
+                    # Usamos .get() para manejar casos donde el elemento no existe
+                    born_date = soup.find('span', class_='author-born-date')
+                    born_date = born_date.text.strip() if born_date else "Unknown"
+                    
+                    born_location = soup.find('span', class_='author-born-location')
+                    born_location = born_location.text.strip() if born_location else "Unknown"
+                    
+                    description = soup.find('div', class_='author-description')
+                    description = description.text.strip() if description else "No description available"
+
+                    # Combinar toda la información en un solo campo 'about'
+                    about = f"Born: {born_date} in {born_location}\n\n{description}"
+
+                    self.authors[quote.author] = Author(name, about)
 
             logging.info(f"Se han extraído {len(self.authors)} autores con éxito")
         except Exception as e:
