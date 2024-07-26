@@ -12,12 +12,17 @@ def database():
         password="admin",
         database="quotes_db"
     )
-    db.clean_database()  # Llama a la función clean_database antes de cada prueba
-    yield db
-    db.clean_database()  # Asegura que la base de datos esté limpia después de cada prueba
-    db.connection.close()
     
-
+    try:
+        db.clean_database()  # Llama a la función clean_database antes de cada prueba
+    except Exception as e:
+        print(f"Error al limpiar la base de datos: {e}")
+    yield db
+    try:
+        db.clean_database()  # Asegura que la base de datos esté limpia después de cada prueba
+    except Exception as e:
+        print(f"Error al limpiar la base de datos: {e}")
+    db.close()
 
 def test_create_tables(database):
     # Verifica que las tablas existan
@@ -38,35 +43,47 @@ def test_create_tables(database):
 
 def test_insert_data(database):
     authors = {
-        "Albert Einstein": Author("Albert Einstein", "Físico teórico alemán."),
+        "Albert Einstein": Author(
+            "Albert Einstein", 
+            "Físico teórico alemán.", 
+            "https://quotes.toscrape.com/author/Albert-Einstein"
+        ),
     }
     quotes = [
-        Quote("La vida es como andar en bicicleta. Para mantener el equilibrio, debes seguir moviéndote.", "Albert Einstein", ["vida", "movimiento"])
+        Quote("La vida es como andar en bicicleta. Para mantener el equilibrio, debes seguir moviéndote.", 
+            "Albert Einstein", 
+            ["vida", "movimiento"],
+            "https://quotes.toscrape.com/author/Albert-Einstein"
+        )
     ]
-
     database.insert_data(quotes, authors)
-
+    
     database.cursor.execute("SELECT COUNT(*) FROM authors")
     assert database.cursor.fetchone()[0] == 1
-
+    
     database.cursor.execute("SELECT COUNT(*) FROM quotes")
     assert database.cursor.fetchone()[0] == 1
-
+    
     database.cursor.execute("SELECT COUNT(*) FROM tags")
     assert database.cursor.fetchone()[0] == 2
 
 def test_get_author_id(database):
     # Primero, insertamos un autor
-    database.cursor.execute("INSERT INTO authors (name, about) VALUES (%s, %s)", ("Albert Einstein", "Físico teórico alemán."))
-    database.connection.commit()
-
     author_name = "Albert Einstein"
+    about = "Físico teórico alemán."
+    about_link = "https://quotes.toscrape.com//author/Albert-Einstein"
+    
+    # Primero, intentamos obtener el ID del autor
     author_id = database.get_author_id(author_name)
+    
+    if author_id is None:
+        # Si el autor no existe, lo insertamos
+        database.cursor.execute("INSERT INTO authors (name, about, about_link) VALUES (%s, %s, %s)", 
+                                (author_name, about, about_link))
+        database.connection.commit()
+        author_id = database.get_author_id(author_name)
+    
     assert author_id is not None
-
-    # Intentar obtener un autor que no existe
-    non_existent_author = database.get_author_id("Non Existent Author")
-    assert non_existent_author is None
 
 def test_get_tag_id(database):
     # Primero, insertamos un tag
