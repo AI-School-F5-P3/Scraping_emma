@@ -12,7 +12,7 @@ SCRAPE_URL = 'https://quotes.toscrape.com/'
 # Configuración de logging
 LOG_CONFIG = {
     'filename': 'logs/scraper.log',
-    'level': 'INFO',
+    'level': 'DEBUG',
     'format': '%(asctime)s:%(levelname)s:%(message)s',
     'encoding': 'utf-8'
 }
