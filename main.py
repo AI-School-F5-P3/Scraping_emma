@@ -1,11 +1,15 @@
 import logging
-from config.config import DB_CONFIG, SCRAPE_URL, LOG_CONFIG
+import os
+from config.config import LOG_CONFIG, DB_CONFIG, SCRAPE_URL, log_dir
 from src.clean_data import clean_data
 from src.scraper import Scraper
 from src.database import Database
 import streamlit as st
 
+# Configuración del archivo de log
 def setup_logging():
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     logging.basicConfig(**LOG_CONFIG)
 
 def main():

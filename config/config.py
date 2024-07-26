@@ -1,18 +1,33 @@
-# Configuración de la base de datos
-DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'admin',
-    'database': 'quotes_db'
-}
+from dotenv import load_dotenv
+import os
 
-# URL del sitio web a scrapear
-SCRAPE_URL = 'https://quotes.toscrape.com/'
+load_dotenv()
 
-# Configuración de logging
+DB_TYPE = os.getenv('DB_TYPE', 'mysql')
+DB_NAME = os.getenv('DB_NAME', 'quotes_db')
+
+if DB_TYPE == 'sqlite':
+    DB_CONFIG = {
+        'database': DB_NAME
+    }
+else:
+    DB_CONFIG = {
+        'host': os.getenv('DB_HOST'),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'database': DB_NAME
+    }
+
+SCRAPE_URL = os.getenv('SCRAPE_URL')
+
+project_dir = os.path.dirname(os.path.abspath(__file__))
+log_dir = os.path.join(project_dir, 'logs')
+
 LOG_CONFIG = {
-    'filename': 'logs/scraper.log',
-    'level': 'DEBUG',
-    'format': '%(asctime)s:%(levelname)s:%(message)s',
-    'encoding': 'utf-8'
+    'level': os.getenv('LOG_LEVEL', 'INFO'),
+    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    'filename': os.path.join('logs', 'scraping.log'),
+    'filemode': 'a',
+    'encoding': 'utf-8'  # Añade esta línea para especificar la codificación
 }
+

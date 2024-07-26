@@ -1,24 +1,29 @@
+import sqlite3
 import mysql.connector
 from mysql.connector import Error
 import logging
+
+from config.config import DB_CONFIG
 
 #from src.models import Author, Quote
 
 class Database:
     def __init__(self, host, user, password, database):
-        try:
-            self.connection = mysql.connector.connect(
-                host=host,
-                user=user,
-                password=password,
-                database=database
-            )
-            if self.connection.is_connected():
-                self.cursor = self.connection.cursor()
-                print("Conectado a la base de datos MySQL")
-        except Error as e:
-            print(f"Error al conectarse a MySQL: {e}")
-
+        if 'host' in DB_CONFIG:  # Check if using MySQL
+            try:
+                self.connection = mysql.connector.connect(
+                    host=host,
+                    user=user,
+                    password=password,
+                    database=database
+                )
+                if self.connection.is_connected():
+                    self.cursor = self.connection.cursor()
+                    print("Conectado a la base de datos MySQL")
+            except Error as e:
+                print(f"Error al conectarse a MySQL: {e}")
+        else:  # Using SQLite
+            self.connection = sqlite3.connect(DB_CONFIG['database'])
     
     def clean_database(self):
         tables = ["quote_tags", "tags", "quotes", "authors"]
@@ -77,13 +82,23 @@ class Database:
 
         for quote in quotes:
             author_id = self.fetch_one("SELECT id FROM authors WHERE name = %s", (quote.author,))[0]
-            self.execute_query("INSERT INTO quotes (text, author_id) VALUES (%s, %s)", (quote.text, author_id))
-            quote_id = self.cursor.lastrowid
-
-            for tag in quote.tags:
-                self.execute_query("INSERT IGNORE INTO tags (name) VALUES (%s)", (tag,))
-                tag_id = self.fetch_one("SELECT id FROM tags WHERE name = %s", (tag,))[0]
-                self.execute_query("INSERT INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)", (quote_id, tag_id))
+            if author_id:
+                self.cursor.execute("""
+                INSERT IGNORE INTO quotes (text, author_id)
+                VALUES (%s, %s)
+                """, (quote.text, author_id))
+                quote_id = self.cursor.lastrowid
+                
+                
+                for tag in quote.tags:
+                    self.execute_query("INSERT IGNORE INTO tags (name) VALUES (%s)", (tag,))
+                    tag_id = self.fetch_one("SELECT id FROM tags WHERE name = %s", (tag,))[0]
+                    self.execute_query("INSERT IGNORE INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)", (quote_id, tag_id))
+            else:
+                logging.warning(f"No se encontró el autor {quote.author} para la cita.")
+            
+            self.connection.commit()
+            logging.info("Datos insertados con éxito")
 
         logging.info("Datos insertados con éxito")
 

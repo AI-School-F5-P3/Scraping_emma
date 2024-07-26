@@ -1,9 +1,17 @@
 import pytest
+import sqlite3
 from src.database import Database
 from src.models import Quote, Author
 from config.config import DB_CONFIG
-import logging
+#import logging
 
+@pytest.fixture
+def database():
+    db = Database(database=':memory:')  # Usa una base de datos en memoria para las pruebas
+    db.create_tables()
+    yield db
+    db.close()
+    
 @pytest.fixture
 def database():
     db = Database(
