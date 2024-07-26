@@ -1,28 +1,12 @@
 class Quote:
-    """
-    Representa una cita extraída de la web.
-
-    Attributes:
-        text (str): El texto de la cita.
-        author (str): El autor de la cita.
-        tags (list): Lista de etiquetas asociadas a la cita.
-    """
-
-    def __init__(self, text, author, tags):
+    def __init__(self, text, author, tags, author_about_link):
         self.text = text
         self.author = author
         self.tags = tags
-
+        self.author_about_link = author_about_link
 
 class Author:
-    """
-    Representa un autor de citas.
-
-    Attributes:
-        name (str): El nombre del autor.
-        about (str): La biografía del autor.
-    """
-
-    def __init__(self, name, about):
+    def __init__(self, name, about, about_link):
         self.name = name
         self.about = about
+        self.about_link = about_link
