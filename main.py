@@ -26,7 +26,7 @@ def main():
         db.create_tables()
         db.insert_data(cleaned_quotes, cleaned_authors)
         #db.insert_data(scraper.quotes, scraper.authors)
-        db.close()
+        #db.close()
 
         logging.info("Extracción y almacenamiento de datos completados con éxito")
 

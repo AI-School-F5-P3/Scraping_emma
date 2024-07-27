@@ -164,7 +164,7 @@ class Database:
                     VALUES (?, ?, ?)
                 """
             self.cursor.execute(query, (author.name, author.about, author.about_link))
-            logging.info(f"Autor insertado: {author.name}")
+            logging.info(f"Autor insertado/actualizado: {author.name}")
         except Error as e:
             logging.error(f"Error al insertar autor {author.name}: {str(e)}")
             raise  
@@ -174,16 +174,29 @@ class Database:
             author_id = self.get_author_id(quote.author)
             if author_id:
                 if self.is_mysql:
-                    query = "INSERT INTO quotes (text, author_id) VALUES (%s, %s)"
+                    query = """
+                        INSERT INTO quotes (text, author_id)
+                        SELECT %s, %s
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM quotes
+                            WHERE text = %s AND author_id = %s
+                        )
+                    """
+                    self.cursor.execute(query, (quote.text, author_id, quote.text, author_id))
                 else:
-                    query = "INSERT INTO quotes (text, author_id) VALUES (?, ?)"
-                self.cursor.execute(query, (quote.text, author_id))
+                    query = """
+                        INSERT OR IGNORE INTO quotes (text, author_id)
+                        VALUES (?, ?)
+                    """
+                    self.cursor.execute(query, (quote.text, author_id))
                 quote_id = self.cursor.lastrowid
-                logging.info(f"Cita insertada: {quote.text[:30]}...")
-
-                for tag in quote.tags:
-                    tag_id = self._insert_tag(tag)
-                    self._insert_quote_tag(quote_id, tag_id)
+                if quote_id:
+                    logging.info(f"Cita insertada: {quote.text[:30]}...")
+                    for tag in quote.tags:
+                        tag_id = self._insert_tag(tag)
+                        self._insert_quote_tag(quote_id, tag_id)
+                else:
+                    logging.info(f"Cita ya existente: {quote.text[:30]}...")
             else:
                 logging.warning(f"No se encontró el autor {quote.author} para la cita.")
         except Error as e:

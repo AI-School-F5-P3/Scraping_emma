@@ -1,19 +1,23 @@
-import logging
-from sqlite3 import Error
+#import logging
+#from sqlite3 import Error
 import pytest
-#import sqlite3
+import sqlite3
 from src.database import Database
 from src.models import Quote, Author
 #from config.config import DB_CONFIG
-#import logging
+import logging
 
 @pytest.fixture
 def database():
     # Usar SQLite en memoria para las pruebas
     db = Database(database=':memory:') 
+    assert not db.is_mysql, "Test database should be SQLite, not MySQL"
     db.create_tables()
     yield db
     db.close()
+
+def test_database_type(database):
+    assert isinstance(database.connection, sqlite3.Connection), "Test database should be SQLite"
     
 #@pytest.fixture
 #def database():

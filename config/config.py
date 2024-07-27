@@ -6,26 +6,31 @@ load_dotenv()
 # Obtener el directorio del proyecto
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DB_TYPE = os.getenv('DB_TYPE', 'mysql')
-DB_NAME = os.getenv('DB_NAME', 'quotes_db')
+#DB_TYPE = os.getenv('DB_TYPE', 'mysql')
+#DB_NAME = os.getenv('DB_NAME', 'quotes_db')
 
-if DB_TYPE == 'mysql':
-    DB_CONFIG = {
-        'host': os.getenv('DB_HOST', 'localhost'),
-        'user': os.getenv('DB_USER'),
-        'password': os.getenv('DB_PASSWORD'),
-        'database': os.getenv('DB_NAME', 'quotes_db')
-    }
-else:
-    DB_CONFIG = {
-        'database': os.getenv('DB_NAME', 'quotes_test.db')
-    }
-
-SCRAPE_URL = os.getenv('SCRAPE_URL')
+#if DB_TYPE == 'mysql':
+#    DB_CONFIG = {
+#        'host': os.getenv('DB_HOST', 'localhost'),
+#        'user': os.getenv('DB_USER'),
+#        'password': os.getenv('DB_PASSWORD'),
+#        'database': os.getenv('DB_NAME', 'quotes_db')
+#    }
+#else:
+#    DB_CONFIG = {
+#        'database': os.getenv('DB_NAME', 'quotes_test.db')
+#    }
+DB_CONFIG = {
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', 'admin'),
+    'database': os.getenv('DB_NAME', 'quotes_db')
+}
+SCRAPE_URL = os.getenv('SCRAPE_URL', 'https://quotes.toscrape.com/')
 
 # Configuración de logs
-log_dir = os.path.join(project_dir, 'logs')
-os.makedirs(log_dir, exist_ok=True)
+#log_dir = os.path.join(project_dir, 'logs')
+#os.makedirs(log_dir, exist_ok=True)
 
 LOG_CONFIG = {
     'level': os.getenv('LOG_LEVEL', 'INFO'),
