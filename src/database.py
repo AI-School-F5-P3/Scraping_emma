@@ -3,25 +3,15 @@ import mysql.connector
 from mysql.connector import Error
 import logging
 
-#from config.config import DB_CONFIG
-
-#from src.models import Author, Quote
-
 class Database:
-#    def __init__(self, config):
-#        self.config = config
-#        if DB_CONFIG['host'] in config:  # MySQL
-#            try:
-#                self.connection = mysql.connector.connect(**config)
-#                if self.connection.is_connected():
-#                    self.cursor = self.connection.cursor()
-#                    print("Conectado a la base de datos MySQL")
-#            except Error as e:
-#               print(f"Error al conectarse a MySQL: {e}")
-#        else:  # SQLite
-#            self.connection = sqlite3.connect(config['database'])
-#            self.cursor = self.connection.cursor()
-#            print("Conectado a la base de datos SQLite")
+    """
+    Clase para manejar las operaciones de la base de datos.
+
+    Attributes:
+        connection (mysql.connector.connection.MySQLConnection or sqlite3.Connection): Conexión a la base de datos.
+        cursor (mysql.connector.cursor.MySQLCursor or sqlite3.Cursor): Cursor para ejecutar queries SQL.
+        is_mysql (bool): Determina si la base de datos es MySQL o SQLite.
+    """
 
     def __init__(self, **kwargs):
         self.config = kwargs
@@ -31,6 +21,7 @@ class Database:
         self.connect() 
 
     def connect(self):
+        """Establece la conexión a la base de datos MySQL o SQLite."""
         try:
             if self.is_mysql:
                 self.connection = mysql.connector.connect(**self.config)
@@ -48,6 +39,12 @@ class Database:
             raise
         
     def create_tables(self):
+        """
+        Crea las tablas necesarias en la base de datos si no existen.
+
+        Raises:
+            Exception: Si ocurre un error al crear las tablas.
+        """       
         try:
             if self.is_mysql:
                 self._create_mysql_tables()
@@ -60,6 +57,7 @@ class Database:
             raise
         
     def _create_mysql_tables(self):
+        """Crea las tablas necesarias en la base de datos MySQL."""
         try:
             self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS authors (
@@ -92,12 +90,13 @@ class Database:
                     )
                 """)
             self.connection.commit()
-            logging.info("Tablas creadas con éxito")
+            logging.info("Tablas MySQL creadas con éxito")
         except Error as e:
-            logging.error(f"Error creando tablas: {str(e)}")
+            logging.error(f"Error creando tablas MySQL: {str(e)}")
             raise
 
-    def _create_sqlite_tables(self):        
+    def _create_sqlite_tables(self):   
+        """Crea las tablas necesarias en la base de datos SQLite."""
         try:
             self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS authors (
@@ -130,12 +129,22 @@ class Database:
                     )
                 """)
             self.connection.commit()
-            logging.info("Tablas creadas con éxito")
+            logging.info("Tablas SQLite creadas con éxito")
         except Error as e:
-            logging.error(f"Error creando tablas: {str(e)}")
+            logging.error(f"Error creando tablas SQLite: {str(e)}")
             raise
         
     def insert_data(self, quotes, authors):
+        """
+        Inserta los datos extraídos en la base de datos.
+
+        Args:
+            quotes (list): Lista de objetos Quote a insertar.
+            authors (dict): Diccionario de objetos Author a insertar.
+
+        Raises:
+            Exception: Si ocurre un error al insertar los datos.
+        """
         try:
             for author_name, author in authors.items():
                 self._insert_author(author)
@@ -150,6 +159,7 @@ class Database:
             self.connection.rollback()
             
     def _insert_author(self, author):
+        """Inserta un autor en la base de datos si no existe."""    
         try:
             if self.is_mysql:
                 query = """
@@ -170,6 +180,7 @@ class Database:
             raise  
         
     def _insert_quote(self, quote):
+        """Inserta una cita en la base de datos si no existe."""
         try:
             author_id = self.get_author_id(quote.author)
             if author_id:
@@ -204,6 +215,7 @@ class Database:
             raise
         
     def _insert_tag(self, tag):
+        """Inserta una etiqueta en la base de datos si no existe."""
         try:
             if self.is_mysql:
                 query = "INSERT IGNORE INTO tags (name) VALUES (%s)"
@@ -217,20 +229,21 @@ class Database:
             raise
         
     def _insert_quote_tag(self, quote_id, tag_id):
+        """Inserta la relación entre una cita y una etiqueta en la base de datos."""
         try:
             if self.is_mysql:
                 query = "INSERT IGNORE INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)"
             else:
                 query = "INSERT OR IGNORE INTO quote_tags (quote_id, tag_id) VALUES (?, ?)"
             self.cursor.execute(query, (quote_id, tag_id))
+            self.connection.commit()
+            logging.info(f"Relación quote_tag insertada: quote_id={quote_id}, tag_id={tag_id}")
         except Error as e:
             logging.error(f"Error al insertar quote_tag: {str(e)}")
             raise
 
-        self.connection.commit()
-        logging.info("Datos insertados con éxito")
-
     def get_author_id(self, author_name):
+        """Obtiene el ID de un autor por su nombre."""
         try:
             query = "SELECT id FROM authors WHERE name = ?" if not self.is_mysql else "SELECT id FROM authors WHERE name = %s"
             self.cursor.execute(query, (author_name,))
@@ -240,33 +253,31 @@ class Database:
             logging.error(f"Error obteniendo el ID del autor: {e}")
             return None
 
-#    def get_or_create_tag(self, tag_name):
-#        query = "SELECT id FROM tags WHERE name = ?"
-#        params = (tag_name,)
-#        result = self.fetch_one(query, params)
-#        if result:
-#            return result[0]
-#        else:
-#            self.execute_query("INSERT INTO tags (name) VALUES (?)", (tag_name,))
-#            return self.cursor.lastrowidastrowid
-
     def get_tag_id(self, tag_name):
-        query = "SELECT id FROM tags WHERE name = ?" if not self.is_mysql else "SELECT id FROM tags WHERE name = %s"
-        self.cursor.execute(query, (tag_name,))
-        result = self.cursor.fetchone()
-        return result[0] if result else None
-    
+        """Obtiene el ID de una etiqueta por su nombre."""
+        try:
+            query = "SELECT id FROM tags WHERE name = ?" if not self.is_mysql else "SELECT id FROM tags WHERE name = %s"
+            self.cursor.execute(query, (tag_name,))
+            result = self.cursor.fetchone()
+            return result[0] if result else None
+        except Error as e:
+            logging.error(f"Error obteniendo el ID del tag: {e}")
+            return None    
+            
     def fetch_one(self, query, params=None):
+        """Ejecuta una consulta y retorna el primer resultado."""
         self.execute_query(query, params)
         return self.cursor.fetchone()
         
     def execute_query(self, query, params=None):
+        """Ejecuta una consulta SQL."""
         try:
             if params:
                 self.cursor.execute(query, params)
             else:
                 self.cursor.execute(query)
             self.connection.commit()
+            logging.info(f"Consulta ejecutada: {query} con parámetros: {params}")
         except Error as e:
             logging.error(f"Error ejecutando la consulta: {e}")
             logging.error(f"Consulta: {query}")

@@ -1,42 +1,65 @@
 from dotenv import load_dotenv
 import os
 
+'''
+En este archivo se realizan las siguentes operaciones:
+- Cargar variables de entorno.
+- Configurar la base de datos y la URL de scraping.
+- Implementar una configuración de logging más robusta con handlers para 
+archivo y consola.
+'''
 load_dotenv()
 
 # Obtener el directorio del proyecto
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#DB_TYPE = os.getenv('DB_TYPE', 'mysql')
-#DB_NAME = os.getenv('DB_NAME', 'quotes_db')
-
-#if DB_TYPE == 'mysql':
-#    DB_CONFIG = {
-#        'host': os.getenv('DB_HOST', 'localhost'),
-#        'user': os.getenv('DB_USER'),
-#        'password': os.getenv('DB_PASSWORD'),
-#        'database': os.getenv('DB_NAME', 'quotes_db')
-#    }
-#else:
-#    DB_CONFIG = {
-#        'database': os.getenv('DB_NAME', 'quotes_test.db')
-#    }
+# Configuración de la base de datos
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD', 'admin'),
     'database': os.getenv('DB_NAME', 'quotes_db')
 }
+
+# # URL del sitio web a scrapear
 SCRAPE_URL = os.getenv('SCRAPE_URL', 'https://quotes.toscrape.com/')
 
-# Configuración de logs
-#log_dir = os.path.join(project_dir, 'logs')
-#os.makedirs(log_dir, exist_ok=True)
-
+# Configuración mejorada de logs
 LOG_CONFIG = {
-    'level': os.getenv('LOG_LEVEL', 'INFO'),
-    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    'filename': os.path.join('logs', 'scraping.log'),
-    'filemode': 'a',
-    'encoding': 'utf-8'  # Añade esta línea para especificar la codificación
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/scraping.log',
+            'mode': 'a',
+            'formatter': 'standard',
+            'encoding': 'utf-8',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+            'stream': 'ext://sys.stdout',
+        }
+    },
+    'loggers': {
+        '': {  # root logger
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
 }
+#LOG_CONFIG = {
+#    'level': os.getenv('LOG_LEVEL', 'INFO'),
+#    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#    'filename': os.path.join('logs', 'scraping.log'),
+#    'filemode': 'a',
+#    'encoding': 'utf-8'  # Añade esta línea para especificar la codificación
+#}
 
