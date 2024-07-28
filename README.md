@@ -25,6 +25,8 @@ La realización de test unitarios se realiza a través de SQLite.
 - Crear una base de datos MySQL llamada ***"quotes_db"***
 - Actualizar los datos de conexión en ***"config/config.py"***
 
+## Estructura de la Base de Datos
+![Diagrama](https://github.com/user-attachments/assets/d9d88d23-2d0e-46d3-9237-31dde625d420)
 
 ## Uso
 
