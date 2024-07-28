@@ -7,7 +7,7 @@ La realización de test unitarios se realiza a través de SQLite.
 ## Requisitos
 
 - **Software:** Python 3.11, pip
-- **Dependencias:*** Lista de bibliotecas como streamlit, pandas, mysql-connector-python, etc.
+- **Dependencias:** Lista de bibliotecas como streamlit, pandas, mysql-connector-python, etc.
 
 ## Instalación
 
@@ -24,6 +24,7 @@ La realización de test unitarios se realiza a través de SQLite.
 3. **Configurar la base de datos:**
 - Crear una base de datos MySQL llamada ***"quotes_db"***
 - Actualizar los datos de conexión en ***"config/config.py"***
+
 
 ## Uso
 
@@ -47,16 +48,4 @@ Ejecutar las pruebas con pytest:
 - **"main.py"**: Script principal para ejecutar el proyecto
 - **"app.py"**: Archivo principal de una aplicación desarrollada en Streamlit para la visualización y gestión de citas extraídas de la web.
 
-## Contribuir
 
-Si deseas contribuir al proyecto, por favor:
-
-1. Haz un fork del repositorio
-2. Crea una nueva rama (***"git checkout -b feature/AmazingFeature"***)
-3. Haz commit de tus cambios (***"git commit -m 'Add some AmazingFeature'"***)
-4. Haz push a la rama (***"git push origin feature/AmazingFeature"***)
-5. Abre un Pull Request
-
-## Licencia
-
-Distribuido bajo la licencia MIT. Ver ***"LICENSE"*** para más información.
