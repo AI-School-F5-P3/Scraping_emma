@@ -6,9 +6,14 @@ from src.database import Database
 from src.clean_data import clean_data
 from config.config import DB_CONFIG, SCRAPE_URL, LOG_CONFIG
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def update_database():
+    '''
+    Esta función:
+    1. Inicializa el scraper y obtiene nuevos datos.
+    2. Limpia los datos obtenidos.
+    3. Conecta a la base de datos e inserta los nuevos datos.
+    '''
     logging.info("Iniciando actualización de la base de datos")
     
     try:
@@ -32,6 +37,10 @@ def update_database():
             db.close()
 
 def run_scheduler():
+    '''
+    Esta función:
+    1. Programa la ejecución de update_database() cada 24 horas (o en el intervalo de tiempo que interese).
+    '''
     schedule.every(1).minute.do(update_database)
     
     while True:
