@@ -5,7 +5,6 @@ from config.config import LOG_CONFIG, DB_CONFIG, SCRAPE_URL
 from src.clean_data import clean_data
 from src.scraper import Scraper
 from src.database import Database
-import streamlit as st
 
 
 def setup_logging():
@@ -53,7 +52,6 @@ def main():
     finally:
         if db:
             db.close()
-            logging.info("Conexión a la base de datos cerrada")
 
 if __name__ == "__main__":
     main()

@@ -14,7 +14,7 @@ class Quote:
         self.author = author
         self.tags = tags
         self.author_about_link = author_about_link
-        logging.info(f"Quote creada: {self.text[:30]}... por {self.author}")
+        logging.info(f"Frase creada: {self.text[:30]}... por {self.author}")
 
 class Author:
     """

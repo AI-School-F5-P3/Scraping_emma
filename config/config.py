@@ -51,11 +51,5 @@ LOG_CONFIG = {
         }
     }
 }
-#LOG_CONFIG = {
-#    'level': os.getenv('LOG_LEVEL', 'INFO'),
-#    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#    'filename': os.path.join('logs', 'scraping.log'),
-#    'filemode': 'a',
-#    'encoding': 'utf-8'  # Añade esta línea para especificar la codificación
-#}
+
 
