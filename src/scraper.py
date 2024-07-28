@@ -20,23 +20,23 @@ class Scraper:
     
     def scrape_quotes(self):
         """
-        Extrae todas las citas de la página principal.
+        Extrae todas las Frases de la página principal.
 
         Raises:
             Exception: Si ocurre un error durante el scraping.
         """
         try:
-            logging.info(f"Iniciando scrape de citas desde {self.url}")
+            logging.info(f"Iniciando scrape de Frases desde {self.url}")
             page = 1
             while True:
                 response = requests.get(f"{self.url}/page/{page}/")
                 if response.status_code != 200:
-                    logging.warning(f"Finalizada la extracción de citas en la página {page}. Código de estado: {response.status_code}")
+                    logging.warning(f"Finalizada la extracción de Frases en la página {page}. Código de estado: {response.status_code}")
                     break
                 soup = BeautifulSoup(response.text, 'html.parser')
                 quote_divs = soup.find_all('div', class_='quote')
                 if not quote_divs:
-                    logging.info(f"No se encontraron más citas en la página {page}")
+                    logging.info(f"No se encontraron más Frases en la página {page}")
                     break
                 for quote_div in quote_divs:
                     text = quote_div.find('span', class_='text').text.strip()
@@ -44,19 +44,19 @@ class Scraper:
                     tags = [tag.text for tag in quote_div.find_all('a', class_='tag')]
                     author_about_link = self.url + quote_div.find('a')['href']
                     self.quotes.append(Quote(text, author, tags, author_about_link))
-                    logging.debug(f"Cita extraída: {text[:30]}... Autor: {author}")
+                    logging.debug(f"Frase extraída: {text[:30]}... Autor: {author}")
                 page += 1
-            logging.info(f"Se han extraído {len(self.quotes)} citas con éxito")
+            logging.info(f"Se han extraído {len(self.quotes)} Frases con éxito")
         except requests.RequestException as e:
-            logging.error(f"Error en la solicitud HTTP al extraer citas: {e}")
+            logging.error(f"Error en la solicitud HTTP al extraer Frases: {e}")
             raise
         except Exception as e:
-            logging.error(f"Error inesperado al extraer citas: {e}")
+            logging.error(f"Error inesperado al extraer Frases: {e}")
             raise
 
     def scrape_authors(self):
         """
-        Extrae la información de los autores de las citas.
+        Extrae la información de los autores de las Frases.
 
         Raises:
             RequestException: Si hay un problema al acceder a la página de un autor.

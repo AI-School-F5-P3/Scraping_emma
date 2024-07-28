@@ -180,7 +180,7 @@ class Database:
             raise  
         
     def _insert_quote(self, quote):
-        """Inserta una cita en la base de datos si no existe."""
+        """Inserta una Frase en la base de datos si no existe."""
         try:
             author_id = self.get_author_id(quote.author)
             if author_id:
@@ -202,16 +202,16 @@ class Database:
                     self.cursor.execute(query, (quote.text, author_id))
                 quote_id = self.cursor.lastrowid
                 if quote_id:
-                    logging.info(f"Cita insertada: {quote.text[:30]}...")
+                    logging.info(f"Frase insertada: {quote.text[:30]}...")
                     for tag in quote.tags:
                         tag_id = self._insert_tag(tag)
                         self._insert_quote_tag(quote_id, tag_id)
                 else:
-                    logging.info(f"Cita ya existente: {quote.text[:30]}...")
+                    logging.info(f"Frase ya existente: {quote.text[:30]}...")
             else:
-                logging.warning(f"No se encontró el autor {quote.author} para la cita.")
+                logging.warning(f"No se encontró el autor {quote.author} para la Frase.")
         except Error as e:
-            logging.error(f"Error al insertar cita: {str(e)}")
+            logging.error(f"Error al insertar Frase: {str(e)}")
             raise
         
     def _insert_tag(self, tag):
@@ -229,7 +229,7 @@ class Database:
             raise
         
     def _insert_quote_tag(self, quote_id, tag_id):
-        """Inserta la relación entre una cita y una etiqueta en la base de datos."""
+        """Inserta la relación entre una Frase y una etiqueta en la base de datos."""
         try:
             if self.is_mysql:
                 query = "INSERT IGNORE INTO quote_tags (quote_id, tag_id) VALUES (%s, %s)"
@@ -263,11 +263,23 @@ class Database:
         except Error as e:
             logging.error(f"Error obteniendo el ID del tag: {e}")
             return None    
-            
+
+    def fetch_all(self, query, params=None):
+        try:
+            self.cursor.execute(query, params)
+            return self.cursor.fetchall()
+        except Error as e:
+            logging.error(f"Error ejecutando la consulta: {e}")
+            return []
+                    
     def fetch_one(self, query, params=None):
         """Ejecuta una consulta y retorna el primer resultado."""
-        self.execute_query(query, params)
-        return self.cursor.fetchone()
+        try:
+            self.cursor.execute(query, params)
+            return self.cursor.fetchone()
+        except Error as e:
+            logging.error(f"Error ejecutando la consulta: {e}")
+            return None
         
     def execute_query(self, query, params=None):
         """Ejecuta una consulta SQL."""

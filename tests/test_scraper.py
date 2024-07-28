@@ -14,26 +14,26 @@ def scraper():
 
 def test_scrape_quotes(scraper):
     """
-    Verifica que el método scrape_quotes extraiga citas correctamente.
+    Verifica que el método scrape_quotes extraiga Frases correctamente.
 
     Args:
         scraper (Scraper): Instancia del scraper.
     
     Raises:
-        AssertionError: Si no se extraen citas.
+        AssertionError: Si no se extraen Frases.
     """
     try:
         logging.info("Iniciando test_scrape_quotes")
         scraper.scrape_quotes()
-        assert len(scraper.quotes) > 0, "No se han extraído citas"
-        logging.info(f"Se han extraído {len(scraper.quotes)} citas con éxito")
+        assert len(scraper.quotes) > 0, "No se han extraído Frases"
+        logging.info(f"Se han extraído {len(scraper.quotes)} Frases con éxito")
     except Exception as e:
         logging.error(f"Error en test_scrape_quotes: {str(e)}")
         raise
 
 def test_scrape_authors(scraper):
     """
-    Verifica que el método scrape_authors extraiga autores correctamente después de extraer citas.
+    Verifica que el método scrape_authors extraiga autores correctamente después de extraer Frases.
 
     Args:
         scraper (Scraper): Instancia del scraper.
@@ -53,22 +53,22 @@ def test_scrape_authors(scraper):
 
 def test_quote_structure(scraper):
     """
-    Verifica que las citas extraídas tengan la estructura correcta.
+    Verifica que las Frases extraídas tengan la estructura correcta.
 
     Args:
         scraper (Scraper): Instancia del scraper.
     
     Raises:
-        AssertionError: Si una cita no tiene la estructura esperada.
+        AssertionError: Si una Frase no tiene la estructura esperada.
     """
     try:
         logging.info("Iniciando test_quote_structure")
         scraper.scrape_quotes()
         quote = scraper.quotes[0]
-        assert hasattr(quote, 'text'), "Atributo 'text' no encontrado en la cita"
-        assert hasattr(quote, 'author'), "Atributo 'author' no encontrado en la cita"
-        assert hasattr(quote, 'tags'), "Atributo 'tas' no encontrado en la cita"
-        logging.info("La estructura de la cita es corgrecta")
+        assert hasattr(quote, 'text'), "Atributo 'text' no encontrado en la Frase"
+        assert hasattr(quote, 'author'), "Atributo 'author' no encontrado en la Frase"
+        assert hasattr(quote, 'tags'), "Atributo 'tas' no encontrado en la Frase"
+        logging.info("La estructura de la Frase es corgrecta")
     except Exception as e:
         logging.error(f"Error en test_quote_structure: {str(e)}")
         raise

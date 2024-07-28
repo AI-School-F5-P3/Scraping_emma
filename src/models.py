@@ -1,12 +1,12 @@
 import logging
 class Quote:
     """
-    Representa una cita extraída de la web.
+    Representa una Frase extraída de la web.
 
     Attributes:
-        text (str): El texto de la cita.
-        author (str): El autor de la cita.
-        tags (list): Lista de etiquetas asociadas a la cita.
+        text (str): El texto de la Frase.
+        author (str): El autor de la Frase.
+        tags (list): Lista de etiquetas asociadas a la Frase.
         author_about_link (str): Enlace a la biografía del autor.
     """
     def __init__(self, text, author, tags, author_about_link):
@@ -18,7 +18,7 @@ class Quote:
 
 class Author:
     """
-    Representa un autor de las citas.
+    Representa un autor de las Frases.
 
     Attributes:
         name (str): El nombre del autor.

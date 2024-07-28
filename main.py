@@ -20,7 +20,7 @@ def main():
 
     Realiza las siguientes tareas:
         1. Configura el logging.
-        2. Realiza el web scraping para obtener citas y autores.
+        2. Realiza el web scraping para obtener Frases y autores.
         3. Limpia los datos obtenidos.
         4. Inserta los datos limpios en la base de datos.
     

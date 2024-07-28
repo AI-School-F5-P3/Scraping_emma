@@ -1,6 +1,6 @@
 # Proyecto Web Scraping
 
-Este proyecto realiza web scraping en el sitio quotes.toscrape.com para extraer citas, autores y etiquetas, y almacenarlos en una base de datos MySQL.
+Este proyecto realiza web scraping en el sitio quotes.toscrape.com para extraer Frases, autores y etiquetas, y almacenarlos en una base de datos MySQL.
 
 ## Requisitos
 
