@@ -40,16 +40,12 @@ LOG_CONFIG = {
             'mode': 'a',
             'formatter': 'standard',
             'encoding': 'utf-8',
-        },
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard',
-            'stream': 'ext://sys.stdout',
+        
         }
     },
     'loggers': {
         '': {  # root logger
-            'handlers': ['file', 'console'],
+            'handlers': ['file'],
             'level': 'INFO',
             'propagate': True
         }

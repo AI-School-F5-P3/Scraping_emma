@@ -3,6 +3,36 @@ import logging
 from src.database import Database
 from config.config import DB_CONFIG
 
+"""
+app.py - Aplicación principal de Streamlit para el Buscador de Frases
+ 
+Este script implementa una interfaz de usuario basada en Streamlit para interactuar con una base de datos de frases, autores y etiquetas. Permite a los usuarios
+ver listas de frases y autores, buscar frases específicas, ver detalles de autores, y explorar frases por etiquetas.
+
+Dependencias principales:
+- streamlit: Para crear la interfaz de usuario web.
+- logging: Para el registro de eventos y errores.
+- src.database: Módulo personalizado para interactuar con la base de datos.
+- config.config: Módulo de configuración para los parámetros de la base de datos.
+
+Funciones principales:
+- setup_logging(): Configura el sistema de logging.
+- set_page_tag_quotes(tag): Cambia el estado de la sesión para mostrar frases por etiqueta.
+- set_page_main(): Restablece el estado de la sesión a la página principal.
+- fetch_*(): Funciones para obtener datos específicos de la base de datos.
+- show_quotes_by_tag(tag_id, tag_name): Muestra frases asociadas a una etiqueta específica.
+- show_tag_buttons(tags, quote_id): Muestra botones para las etiquetas de una frase.
+
+La aplicación utiliza un menú lateral para la navegación principal entre diferentes vistas:
+- Lista de Frases
+- Frase individual
+- Lista de Autores
+- Autor individual
+- TOP 5 (Frases, Autores, Etiquetas)
+
+Cada vista interactúa con la base de datos para obtener y mostrar la información relevante.
+
+"""
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
