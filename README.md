@@ -22,6 +22,10 @@ Este proyecto realiza web scraping en el sitio quotes.toscrape.com para extraer 
 - Crear una base de datos MySQL llamada ***"quotes_db"***
 - Actualizar los datos de conexión en ***"config/config.py"***
 
+## Estructura de la base de datos
+![imagen](https://github.com/user-attachments/assets/0deda230-0ec8-4f7e-8d7c-1690b981c9ab)
+
+
 ## Uso
 
 Ejecutar el script principal:
