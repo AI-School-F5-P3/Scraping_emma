@@ -48,10 +48,11 @@ class Database:
         try:
             if self.is_mysql:
                 self._create_mysql_tables()
+                logging.info("Tablas MySQL creadas con éxito")           
             else:
                 self._create_sqlite_tables()
+                logging.info("Tablas SQLite creadas con éxito")
             self.connection.commit()
-            logging.info("Tablas creadas con éxito")
         except Error as e:
             logging.error(f"Error creando tablas: {str(e)}")
             raise
@@ -90,7 +91,6 @@ class Database:
                     )
                 """)
             self.connection.commit()
-            logging.info("Tablas MySQL creadas con éxito")
         except Error as e:
             logging.error(f"Error creando tablas MySQL: {str(e)}")
             raise
@@ -129,7 +129,6 @@ class Database:
                     )
                 """)
             self.connection.commit()
-            logging.info("Tablas SQLite creadas con éxito")
         except Error as e:
             logging.error(f"Error creando tablas SQLite: {str(e)}")
             raise
@@ -174,7 +173,6 @@ class Database:
                     VALUES (?, ?, ?)
                 """
             self.cursor.execute(query, (author.name, author.about, author.about_link))
-            logging.info(f"Autor insertado/actualizado: {author.name}")
         except Error as e:
             logging.error(f"Error al insertar autor {author.name}: {str(e)}")
             raise  
@@ -206,8 +204,6 @@ class Database:
                     for tag in quote.tags:
                         tag_id = self._insert_tag(tag)
                         self._insert_quote_tag(quote_id, tag_id)
-                else:
-                    logging.info(f"Frase ya existente: {quote.text[:30]}...")
             else:
                 logging.warning(f"No se encontró el autor {quote.author} para la Frase.")
         except Error as e:
@@ -237,7 +233,6 @@ class Database:
                 query = "INSERT OR IGNORE INTO quote_tags (quote_id, tag_id) VALUES (?, ?)"
             self.cursor.execute(query, (quote_id, tag_id))
             self.connection.commit()
-            logging.info(f"Relación quote_tag insertada: quote_id={quote_id}, tag_id={tag_id}")
         except Error as e:
             logging.error(f"Error al insertar quote_tag: {str(e)}")
             raise

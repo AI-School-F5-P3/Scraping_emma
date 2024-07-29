@@ -44,7 +44,6 @@ class Scraper:
                     tags = [tag.text for tag in quote_div.find_all('a', class_='tag')]
                     author_about_link = self.url + quote_div.find('a')['href']
                     self.quotes.append(Quote(text, author, tags, author_about_link))
-                    logging.debug(f"Frase extraída: {text[:30]}... Autor: {author}")
                 page += 1
             logging.info(f"Se han extraído {len(self.quotes)} Frases con éxito")
         except requests.RequestException as e:
@@ -81,7 +80,6 @@ class Scraper:
                         
                         about = f"Born: {born_date} in {born_location}\n\n{description}"
                         self.authors[quote.author] = Author(name, about, quote.author_about_link)
-                        logging.debug(f"Autor extraído: {name}")
                     except requests.RequestException as e:
                         logging.error(f"Error en la solicitud HTTP al extraer información del autor {quote.author}: {e}")
                         raise

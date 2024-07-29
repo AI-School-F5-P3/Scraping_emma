@@ -1,10 +1,13 @@
-import logging
 from sqlite3 import Error
 import pytest
 import sqlite3
 from src.database import Database
 from src.models import Quote, Author
+import logging
+import logging.config
+from config.config import LOG_CONFIG
 
+logging.config.dictConfig(LOG_CONFIG)
 
 @pytest.fixture
 def database():
@@ -15,7 +18,6 @@ def database():
         Database: Instancia de la clase Database conectada a una base de datos en memoria.
     """
     db = Database(database=':memory:') 
-    assert not db.is_mysql, "La base de datos de prueba debe ser SQLite, no MySQL"
     db.create_tables()
     yield db
     db.close()
@@ -40,13 +42,12 @@ def test_create_tables(database):
     try:
         database.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = database.cursor.fetchall()
-        logging.debug(f"Tablas encontradas en la base de datos: {tables}")
         tables = [table[0] for table in tables]
         assert "authors" in tables
         assert "quotes" in tables
         assert "tags" in tables
         assert "quote_tags" in tables
-        logging.info("Las tablas se han creado correctamente.")
+        logging.info("Verificación correcta para la creacción de tablas.")
     except Error as e:
         logging.error(f"Error verificando la creación de tablas: {str(e)}")
         raise
@@ -74,6 +75,8 @@ def test_insert_data(database):
     ]
     try:
         database.insert_data(quotes, authors)
+        
+        # Verificar que los datos se insertaron correctamente
         database.cursor.execute("SELECT COUNT(*) FROM authors")
         assert database.cursor.fetchone()[0] == 1
         
@@ -82,7 +85,7 @@ def test_insert_data(database):
         
         database.cursor.execute("SELECT COUNT(*) FROM tags")
         assert database.cursor.fetchone()[0] == 2
-        logging.info("Datos insertados y verificados con éxito.")
+        logging.info("Verificación corecta para la inserción de datos.")
     except Error as e:
         logging.error(f"Error insertando datos: {str(e)}")
         raise
@@ -109,7 +112,6 @@ def test_get_author_id(database):
             database.connection.commit()
             author_id = database.get_author_id(author_name)
             assert author_id is not None
-        logging.info(f"ID del autor {author_name} obtenido correctamente.")
     except Error as e:
         logging.error(f"Error obteniendo ID del autor: {str(e)}")
         raise
@@ -133,7 +135,6 @@ def test_get_tag_id(database):
         non_existent_tag = database.get_tag_id("non_existent_tag")
         assert non_existent_tag is None
         assert non_existent_tag is None
-        logging.info(f"ID de la etiqueta {tag_name} obtenido correctamente.")
     except Error as e:
         logging.error(f"Error obteniendo ID de la etiqueta: {str(e)}")
         raise

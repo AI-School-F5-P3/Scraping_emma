@@ -196,9 +196,26 @@ else:
             selected_page = st.selectbox("Selecciona página", range(1, total_pages + 1))
             start = (selected_page - 1) * authors_per_page
             end = start + authors_per_page
-        
+            
             for author in authors[start:end]:
-                st.markdown(f"**Autor:** {author[1]} - [About]({author[3]})")
+                # Crear columnas para autor, biografía (About) y botón de ver frases
+                cols = st.columns([3, 2, 1])
+                # Mostrar el nombre del autor
+                cols[0].markdown(f"**Autor:** {author[1]}")
+                # Mostrar el enlace a la biografía con texto "About"
+                cols[1].markdown(f"**Biografía:** [About](%s)" % author[3])
+                # Botón para ver las frases del autor
+                if cols[2].button("Ver frases", key=f"show_quotes_{author[0]}"):
+                    st.subheader(f"Frases de {author[1]}:")
+                    quotes = fetch_quotes_by_author(author[0])
+                    if quotes:
+                        for quote in quotes:
+                            st.markdown(f"- '{quote[1]}'")
+                    else:
+                        st.warning("No se encontraron frases para este autor")
+                st.markdown("---")
+            #for author in authors[start:end]:
+                #st.markdown(f"**Autor:** {author[1]} - [About]({author[3]})")
                 #st.write(f"Nombre: {author[1]}, About: {author[3]}")
         except Exception as e:
             st.error(f"Error buscando autores: {e}")
@@ -212,6 +229,15 @@ else:
                 author = fetch_author_by_id(author_id)
                 if author:
                     st.markdown(f"**Autor:** {author[1]} - [About]({author[3]})")
+                    
+                    # Mostrar todas las frases asociadas al autor
+                    quotes = fetch_quotes_by_author(author_id)
+                    if quotes:
+                        st.subheader(f"Frases de {author[1]}:")
+                        for quote in quotes:
+                            st.markdown(f"- '{quote[1]}'")
+                    else:
+                        st.warning("No se encontraron frases para este autor")
                 else:
                     st.warning("No se ha encontrado ningún autor con este ID")
             except Exception as e:

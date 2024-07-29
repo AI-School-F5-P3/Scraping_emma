@@ -1,4 +1,3 @@
-import logging
 class Quote:
     """
     Representa una Frase extraída de la web.
@@ -14,7 +13,6 @@ class Quote:
         self.author = author
         self.tags = tags
         self.author_about_link = author_about_link
-        logging.info(f"Frase creada: {self.text[:30]}... por {self.author}")
 
 class Author:
     """
@@ -29,4 +27,3 @@ class Author:
         self.name = name
         self.about = about
         self.about_link = about_link
-        logging.info(f"Autor creado: {self.name}")
