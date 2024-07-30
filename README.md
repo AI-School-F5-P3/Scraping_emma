@@ -7,7 +7,7 @@ La realización de test unitarios se realiza a través de SQLite.
 ## Requisitos
 
 - **Software:** Python 3.11, pip
-- **Dependencias:** Lista de bibliotecas como streamlit, pandas, mysql-connector-python, etc.
+- **Dependencias:** Lista de bibliotecas como streamlit, pandas, mysql-connector-python, BeautifulSoup, request.
 
 ## Instalación
 
